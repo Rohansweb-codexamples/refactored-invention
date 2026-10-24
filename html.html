@@ -1,0 +1,563 @@
+
+
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient & Wave Background Designer</title>
+    <!-- Tailwind CSS (Whitelisted Domain) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Whitelisted Domain) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom smooth scrollbar for setup panels */
+        ::-webkit-scrollbar {
+            width: 6px;
+
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Hide color input native styling wrapper cleanly */
+        .color-picker-wrapper::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker-wrapper::-webkit-color-swatch {
+            border: none;
+            border-radius: 0.5rem;
+        }
+
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden">
+
+    <!-- Custom Notification Popup Box System -->
+    <div id="toast-notification" class="fixed top-6 right-6 z-50 transform translate-y-[-150%] transition-transform duration-300 ease-out bg-slate-900 border border-emerald-500/30 text-slate-100 px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 max-w-sm">
+        <div class="text-emerald-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div id="toast-message" class="text-sm font-medium">Action completed successfully</div>
+    </div>
+
+    <!-- Header Navigation Section -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900 px-6 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-md">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+
+                <h1 class="font-bold text-sm tracking-tight text-white md:text-base">WaveCraft Studio</h1>
+                <p class="text-[10px] text-slate-400 font-medium">Vector Canvas Asset Engine</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="randomizeAllParameters()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-lg transition-colors flex items-center space-x-1.5 border border-slate-700">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"/></svg>
+                <span class="hidden sm:inline">Shuffle Design</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Application Split Window Grid layout -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        
+        <!-- LEFT PANEL: Dynamic Multi-Layer Render Preview Frame -->
+        <div class="flex-1 bg-slate-900 p-4 md:p-8 flex items-center justify-center relative overflow-hidden group">
+            <div id="canvas-preview-container" class="w-full h-full max-h-[600px] aspect-[16/9] rounded-2xl shadow-2xl relative overflow-hidden transition-all duration-300 border border-slate-800" style="background: linear-gradient(135deg, #1e1b4b, #311042);">
+                
+
+                <!-- Dynamic SVG Waves Generated and Managed via App Core Loop Scripts Engine -->
+                <svg id="svg-wave-viewport" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path id="wave-path-1" d="" fill="#4f46e5" opacity="0.5"/>
+                    <path id="wave-path-2" d="" fill="#7c3aed" opacity="0.3"/>
+                    <path id="wave-path-3" d="" fill="#db2777" opacity="0.2"/>
+                </svg>
+
+            </div>
+            
+            <!-- Quick View Indicator Overlay Badge -->
+            <div class="absolute bottom-12 left-12 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-[11px] font-semibold text-slate-400 tracking-wide select-none">
+                Live Preview Viewport 16:9 Matrix
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Configurator & Multi-Layer Parameters Dashboard Console -->
+        <div class="w-full lg:w-[420px] bg-slate-950 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col flex-shrink-0 overflow-hidden">
+            
+            <!-- Top Segment Tabs Switch Selector -->
+
+            <div class="flex border-b border-slate-800 bg-slate-900/40 p-2 gap-1 flex-shrink-0">
+                <button onclick="toggleConfigTab('gradient')" id="tab-btn-gradient" class="flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all bg-indigo-600 text-white shadow">
+                    Gradients
+                </button>
+                <button onclick="toggleConfigTab('waves')" id="tab-btn-waves" class="flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+                    Wave Vectors
+                </button>
+                <button onclick="toggleConfigTab('export')" id="tab-btn-export" class="flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+                    Export Studio
+                </button>
+            </div>
+
+            <!-- Scrollable Settings Sections Wrapper Container Stack -->
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                
+                <!-- TAB CONTENT BLOCK 1: GRADIENT ENGINE CONTROLS -->
+                <div id="tab-pane-gradient" class="space-y-5">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-1">Color Palette Mapping</h3>
+
+                        <p class="text-xs text-slate-500">Formulate base workspace lighting gradients maps matrices</p>
+                    </div>
+
+                    <!-- Color Pickers Config Node Cards -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-center">
+                            <label class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Color A</label>
+                            <input type="color" id="input-grad-color1" value="#1e1b4b" oninput="updateMatrixStateEngine()" class="color-picker-wrapper w-full h-9 bg-transparent cursor-pointer">
+                        </div>
+                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-center">
+                            <label class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Color B</label>
+                            <input type="color" id="input-grad-color2" value="#4c1d95" oninput="updateMatrixStateEngine()" class="color-picker-wrapper w-full h-9 bg-transparent cursor-pointer">
+                        </div>
+                        <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-center">
+                            <label class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-2">Color C</label>
+                            <input type="color" id="input-grad-color3" value="#311042" oninput="updateMatrixStateEngine()" class="color-picker-wrapper w-full h-9 bg-transparent cursor-pointer">
+                        </div>
+                    </div>
+
+
+                    <!-- Gradient Angle Parameters Config Node Layout -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-slate-300">Linear Sweep Angle</label>
+                            <span id="label-grad-angle" class="text-xs text-indigo-400 font-bold tabular-nums">135°</span>
+                        </div>
+                        <input type="range" id="input-grad-angle" min="0" max="360" value="135" oninput="updateMatrixStateEngine()" class="w-full accent-indigo-500 bg-slate-950 h-1.5 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT BLOCK 2: MULTI-LAYER WAVES VECTOR PARAMS MAPPING -->
+                <div id="tab-pane-waves" class="hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-1">Wave Displacement Parameters</h3>
+                            <p class="text-xs text-slate-500">Fine-tune spatial wave layers frequency algorithms</p>
+                        </div>
+                        <!-- Animation Master Switch Button Toggle -->
+                        <button onclick="toggleMotionState()" id="btn-motion-trigger" class="px-2.5 py-1.5 text-[11px] font-bold rounded-lg border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 transition-all flex items-center space-x-1">
+
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="label-motion-state">Motion ON</span>
+                        </button>
+                    </div>
+
+                    <!-- Accordion Stack Control Mapping for Three Individual Vector Wave Paths Layers -->
+                    <div class="space-y-4">
+                        <!-- WAVE LAYER NODE FRAME 1 -->
+                        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+                            <div class="bg-slate-850 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+                                <span class="text-xs font-bold text-indigo-400 uppercase tracking-wide">Vector Layer 01 (Foreground)</span>
+                                <input type="color" id="input-wave-color1" value="#4f46e5" oninput="updateMatrixStateEngine()" class="color-picker-wrapper w-6 h-6 bg-transparent cursor-pointer">
+                            </div>
+                            <div class="p-4 space-y-3.5">
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs text-slate-400"><label>Wave Crest Amplitude</label><span id="val-amp1" class="font-semibold text-slate-200 tabular-nums">50</span></div>
+                                    <input type="range" id="input-amp1" min="10" max="150" value="50" oninput="updateMatrixStateEngine()" class="w-full accent-indigo-500 bg-slate-950 h-1.5 rounded cursor-pointer appearance-none">
+                                </div>
+                                <div class="space-y-1.5">
+
+                                    <div class="flex justify-between text-xs text-slate-400"><label>Frequency Spread Range</label><span id="val-freq1" class="font-semibold text-slate-200 tabular-nums">2.5</span></div>
+                                    <input type="range" id="input-freq1" min="0.5" max="6" step="0.1" value="2.5" oninput="updateMatrixStateEngine()" class="w-full accent-indigo-500 bg-slate-950 h-1.5 rounded cursor-pointer appearance-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-slate-500 font-bold uppercase">Layer Opacity</label>
+                                        <input type="range" id="input-opac1" min="0.1" max="1" step="0.05" value="0.6" oninput="updateMatrixStateEngine()" class="w-full accent-indigo-500 bg-slate-950 h-1 rounded appearance-none">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-slate-500 font-bold uppercase">Velocity Speed</label>
+                                        <input type="range" id="input-speed1" min="0.01" max="0.1" step="0.01" value="0.03" oninput="updateMatrixStateEngine()" class="w-full accent-indigo-500 bg-slate-950 h-1 rounded appearance-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WAVE LAYER NODE FRAME 2 -->
+                        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+                            <div class="bg-slate-850 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+
+                                <span class="text-xs font-bold text-violet-400 uppercase tracking-wide">Vector Layer 02 (Midground)</span>
+                                <input type="color" id="input-wave-color2" value="#7c3aed" oninput="updateMatrixStateEngine()" class="color-picker-wrapper w-6 h-6 bg-transparent cursor-pointer">
+                            </div>
+                            <div class="p-4 space-y-3.5">
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs text-slate-400"><label>Wave Crest Amplitude</label><span id="val-amp2" class="font-semibold text-slate-200 tabular-nums">75</span></div>
+                                    <input type="range" id="input-amp2" min="10" max="150" value="75" oninput="updateMatrixStateEngine()" class="w-full accent-violet-500 bg-slate-950 h-1.5 rounded cursor-pointer appearance-none">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs text-slate-400"><label>Frequency Spread Range</label><span id="val-freq2" class="font-semibold text-slate-200 tabular-nums">1.8</span></div>
+                                    <input type="range" id="input-freq2" min="0.5" max="6" step="0.1" value="1.8" oninput="updateMatrixStateEngine()" class="w-full accent-violet-500 bg-slate-950 h-1.5 rounded cursor-pointer appearance-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-slate-500 font-bold uppercase">Layer Opacity</label>
+                                        <input type="range" id="input-opac2" min="0.1" max="1" step="0.05" value="0.4" oninput="updateMatrixStateEngine()" class="w-full accent-violet-500 bg-slate-950 h-1 rounded appearance-none">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-slate-500 font-bold uppercase">Velocity Speed</label>
+
+                                        <input type="range" id="input-speed2" min="0.01" max="0.1" step="0.01" value="0.02" oninput="updateMatrixStateEngine()" class="w-full accent-violet-500 bg-slate-950 h-1 rounded appearance-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WAVE LAYER NODE FRAME 3 -->
+                        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+                            <div class="bg-slate-850 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+                                <span class="text-xs font-bold text-pink-400 uppercase tracking-wide">Vector Layer 03 (Background)</span>
+                                <input type="color" id="input-wave-color3" value="#db2777" oninput="updateMatrixStateEngine()" class="color-picker-wrapper w-6 h-6 bg-transparent cursor-pointer">
+                            </div>
+                            <div class="p-4 space-y-3.5">
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs text-slate-400"><label>Wave Crest Amplitude</label><span id="val-amp3" class="font-semibold text-slate-200 tabular-nums">110</span></div>
+                                    <input type="range" id="input-amp3" min="10" max="150" value="110" oninput="updateMatrixStateEngine()" class="w-full accent-pink-500 bg-slate-950 h-1.5 rounded cursor-pointer appearance-none">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div class="flex justify-between text-xs text-slate-400"><label>Frequency Spread Range</label><span id="val-freq3" class="font-semibold text-slate-200 tabular-nums">1.2</span></div>
+
+                                    <input type="range" id="input-freq3" min="0.5" max="6" step="0.1" value="1.2" oninput="updateMatrixStateEngine()" class="w-full accent-pink-500 bg-slate-950 h-1.5 rounded cursor-pointer appearance-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-slate-500 font-bold uppercase">Layer Opacity</label>
+                                        <input type="range" id="input-opac3" min="0.1" max="1" step="0.05" value="0.3" oninput="updateMatrixStateEngine()" class="w-full accent-pink-500 bg-slate-950 h-1 rounded appearance-none">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-slate-500 font-bold uppercase">Velocity Speed</label>
+                                        <input type="range" id="input-speed3" min="0.01" max="0.1" step="0.01" value="0.01" oninput="updateMatrixStateEngine()" class="w-full accent-pink-500 bg-slate-950 h-1 rounded appearance-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT BLOCK 3: CODE COMPILATION EXPORT PIPELINES -->
+                <div id="tab-pane-export" class="hidden space-y-4">
+
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-1">Production Asset Export</h3>
+                        <p class="text-xs text-slate-500">Extract high-fidelity structural layouts blueprints</p>
+                    </div>
+
+                    <div class="space-y-3 pt-2">
+                        <!-- Export Actions Buttons Stack Grid -->
+                        <button onclick="copySvgCodeToClipboard()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-3 px-4 rounded-xl shadow-lg transition-colors flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-5 10h5m-5 4h5m-9-4h.01M9 16h.01"/></svg>
+                            <span>Copy Inline SVG Markup</span>
+                        </button>
+                        
+                        <button onclick="copyCssGradientToClipboard()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold text-xs py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                            <span>Copy CSS Background Style</span>
+                        </button>
+
+                        <button onclick="downloadSvgVectorFile()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-3 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+
+                            <span>Download SVG Vector File</span>
+                        </button>
+                    </div>
+
+                    <!-- Hidden Sandbox Textarea node frame array mapping standard utility fallback systems -->
+                    <textarea id="hidden-clipboard-buffer" class="absolute -top-9999 left-0 w-1 h-1 opacity-0 pointer-events-none select-none"></textarea>
+                </div>
+
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- CORE DESIGNS & GRAPHICAL CALCULATIONS ALGORITHMS PARSING SCRIPTS -->
+    <script>
+        // Monolith Encapsulated Architecture Parameters Workspace Core States Block
+        let appConfig = {
+            activeTab: 'gradient',
+            motionRunning: true,
+
+            timePhaseTracker: 0,
+            gradient: {
+                color1: '#1e1b4b',
+                color2: '#4c1d95',
+                color3: '#311042',
+                angle: 135
+            },
+            layers: [
+                { id: '1', amp: 50, freq: 2.5, opac: 0.6, speed: 0.03, color: '#4f46e5' },
+                { id: '2', amp: 75, freq: 1.8, opac: 0.4, speed: 0.02, color: '#7c3aed' },
+                { id: '3', amp: 110, freq: 1.2, opac: 0.3, speed: 0.01, color: '#db2777' }
+            ]
+        };
+
+        // Window Lifecycle Document DOM Ready Initalization Initialization Hooks Pipeline
+        window.onload = function() {
+            // Read initial visual parameters coordinates inside setup matrix
+            readInputsToLocalState();
+            // Start main layout execution render engine loop sequence cycle 
+
+            requestAnimationFrame(coreGraphicsRenderLoopPipeline);
+        };
+
+        // UI Tabs Layout Toggling Engine Module Dispatcher
+        function toggleConfigTab(targetPaneId) {
+            appConfig.activeTab = targetPaneId;
+            
+            // Hide arrays items nodes layouts mappings groups loop
+            document.getElementById('tab-pane-gradient').classList.add('hidden');
+            document.getElementById('tab-pane-waves').classList.add('hidden');
+            document.getElementById('tab-pane-export').classList.add('hidden');
+
+            document.getElementById('tab-btn-gradient').className = "flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            document.getElementById('tab-btn-waves').className = "flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+            document.getElementById('tab-btn-export').className = "flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+
+            // Activate specific selected targets profiles frameworks components structures
+            document.getElementById(`tab-pane-${targetPaneId}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${targetPaneId}`).className = "flex-1 text-center py-2 text-xs font-semibold rounded-lg transition-all bg-indigo-600 text-white shadow";
+
+        }
+
+        // Standard Parameter State Updates Interceptors Loops Hook
+        function updateMatrixStateEngine() {
+            readInputsToLocalState();
+            if(!appConfig.motionRunning) {
+                // If animation loop is suspended, update graphical elements immediately once explicitly
+                executeVectorRedrawSequence();
+            }
+        }
+
+        // Sync layout configuration structures values array properties metrics models
+        function readInputsToLocalState() {
+            appConfig.gradient.color1 = document.getElementById('input-grad-color1').value;
+            appConfig.gradient.color2 = document.getElementById('input-grad-color2').value;
+            appConfig.gradient.color3 = document.getElementById('input-grad-color3').value;
+            appConfig.gradient.angle = parseInt(document.getElementById('input-grad-angle').value);
+
+            document.getElementById('label-grad-angle').innerText = appConfig.gradient.angle + '°';
+
+
+            // Read individual layer structural vector sets parameters components logs loops
+            for(let i = 1; i <= 3; i++) {
+                appConfig.layers[i-1].amp = parseFloat(document.getElementById(`input-amp${i}`).value);
+                appConfig.layers[i-1].freq = parseFloat(document.getElementById(`input-freq${i}`).value);
+                appConfig.layers[i-1].opac = parseFloat(document.getElementById(`input-opac${i}`).value);
+                appConfig.layers[i-1].speed = parseFloat(document.getElementById(`input-speed${i}`).value);
+                appConfig.layers[i-1].color = document.getElementById(`input-wave-color${i}`).value;
+
+                // Sync numerical labels markers text blocks safely
+                document.getElementById(`val-amp${i}`).innerText = appConfig.layers[i-1].amp;
+                document.getElementById(`val-freq${i}`).innerText = appConfig.layers[i-1].freq;
+            }
+
+            // Apply calculated background gradient inline style values straight to preview window panel block
+            const gradStyleString = `linear-gradient(${appConfig.gradient.angle}deg, ${appConfig.gradient.color1}, ${appConfig.gradient.color2}, ${appConfig.gradient.color3})`;
+            document.getElementById('canvas-preview-container').style.background = gradStyleString;
+        }
+
+        // Global Motion Activity Engine Toggler Module Block
+
+        function toggleMotionState() {
+            appConfig.motionRunning = !appConfig.motionRunning;
+            const btn = document.getElementById('btn-motion-trigger');
+            const label = document.getElementById('label-motion-state');
+
+            if(appConfig.motionRunning) {
+                btn.className = "px-2.5 py-1.5 text-[11px] font-bold rounded-lg border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 transition-all flex items-center space-x-1";
+                btn.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span id="label-motion-state">Motion ON</span>`;
+                requestAnimationFrame(coreGraphicsRenderLoopPipeline);
+            } else {
+                btn.className = "px-2.5 py-1.5 text-[11px] font-bold rounded-lg border bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 transition-all flex items-center space-x-1";
+                btn.innerHTML = `<span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span><span id="label-motion-state">Motion Frozen</span>`;
+            }
+        }
+
+        // Continuous Realtime Animation Pipeline Render Frame Module Loop
+        function coreGraphicsRenderLoopPipeline() {
+            if(!appConfig.motionRunning) return;
+
+
+            executeVectorRedrawSequence();
+            
+            // Advance internal coordinate system state tracking indexes loops parameters
+            appConfig.timePhaseTracker += 0.05;
+            
+            requestAnimationFrame(coreGraphicsRenderLoopPipeline);
+        }
+
+        // Core Mathematical Array Plotting Script Matrix for SVG Wave Calculations
+        function executeVectorRedrawSequence() {
+            // Screen space configuration dimensions maps coordinates matches standard viewport
+            const viewWidth = 1440;
+            const baseBaseLineHeight = 550; // Waves originate around this horizontal grid height axis
+
+            for(let layerIdx = 0; layerIdx < 3; layerIdx++) {
+                const layer = appConfig.layers[layerIdx];
+                const pathElement = document.getElementById(`wave-path-${layerIdx + 1}`);
+                
+                if(!pathElement) continue;
+
+
+                // Incremental horizontal step resolution limits computational overhead constraints smoothly
+                const horizontalStep = 8;
+                let pathStringData = `M 0 ${baseBaseLineHeight}`;
+
+                // Calculate incremental sine curve grid coordinates parameters plots loop
+                for(let currentX = 0; currentX <= viewWidth; currentX += horizontalStep) {
+                    // Sine calculation formula mapping frequency, coordinates adjustments, and animation phases parameters
+                    const radianPhaseAngle = (currentX / viewWidth) * Math.PI * layer.freq;
+                    const shiftOffsetMotionValue = appConfig.timePhaseTracker * (layer.speed * 10) + (layerIdx * 45);
+                    
+                    // Core dynamic Y calculation mapping vectors
+                    const currentCalculatedY = baseBaseLineHeight + Math.sin(radianPhaseAngle + shiftOffsetMotionValue) * layer.amp;
+                    
+                    pathStringData += ` L ${currentX} ${currentCalculatedY.toFixed(2)}`;
+                }
+
+                // Wrap vector loop lines down securely into viewport layout baseline footer grids box boundaries
+                pathStringData += ` L ${viewWidth} 800 L 0 800 Z`;
+
+
+                // Update element properties attributes matrices arrays data channels values cleanly
+                pathElement.setAttribute('d', pathStringData);
+                pathElement.setAttribute('fill', layer.color);
+                pathElement.setAttribute('opacity', layer.opac);
+            }
+        }
+
+        // Layout Parameters Randomizer Generator Systems
+        function randomizeAllParameters() {
+            const hexCodesArray = ['#1e1b4b', '#311042', '#4c1d95', '#7c3aed', '#db2777', '#4f46e5', '#0f172a', '#0369a1', '#0d9488', '#b45309', '#15803d', '#be123c', '#6366f1'];
+            
+            const pickRandomHex = () => hexCodesArray[Math.floor(Math.random() * hexCodesArray.length)];
+
+            document.getElementById('input-grad-color1').value = pickRandomHex();
+            document.getElementById('input-grad-color2').value = pickRandomHex();
+            document.getElementById('input-grad-color3').value = pickRandomHex();
+            document.getElementById('input-grad-angle').value = Math.floor(Math.random() * 360);
+
+            for(let i = 1; i <= 3; i++) {
+
+                document.getElementById(`input-amp${i}`).value = Math.floor(Math.random() * 95) + 20;
+                document.getElementById(`input-freq${i}`).value = (Math.random() * 3.5 + 0.8).toFixed(1);
+                document.getElementById(`input-opac${i}`).value = (Math.random() * 0.5 + 0.2).toFixed(2);
+                document.getElementById(`input-wave-color${i}`).value = pickRandomHex();
+            }
+
+            triggerCustomToastNotification("Visual matrix grid vectors randomized successfully");
+            updateMatrixStateEngine();
+        }
+
+        // --- PIPELINE MODULE: DATA EXPORT & EXECUTIONS CAPTURES SYSTEMS ---
+        
+        function generateCompleteSvgStringMarkup() {
+            const svgNode = document.getElementById('svg-wave-viewport');
+            const colorA = appConfig.gradient.color1;
+            const colorB = appConfig.gradient.color2;
+            const colorC = appConfig.gradient.color3;
+            const angle = appConfig.gradient.angle;
+
+
+            // Generate clean inline CSS definitions definitions blocks mappings maps templates
+            const svgExportTemplate = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 800" width="100%" height="100%">
+    <defs>
+        <linearGradient id="wavecraft-bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${colorA}" />
+            <stop offset="50%" stop-color="${colorB}" />
+            <stop offset="100%" stop-color="${colorC}" />
+        </linearGradient>
+    </defs>
+    <rect width="1440" height="800" fill="url(#wavecraft-bg-gradient)" />
+    <path d="${document.getElementById('wave-path-1').getAttribute('d')}" fill="${appConfig.layers[0].color}" opacity="${appConfig.layers[0].opac}"/>
+    <path d="${document.getElementById('wave-path-2').getAttribute('d')}" fill="${appConfig.layers[1].color}" opacity="${appConfig.layers[1].opac}"/>
+    <path d="${document.getElementById('wave-path-3').getAttribute('d')}" fill="${appConfig.layers[2].color}" opacity="${appConfig.layers[2].opac}"/>
+</svg>`.trim();
+
+            return svgExportTemplate;
+        }
+
+
+        function copySvgCodeToClipboard() {
+            const rawSvgString = generateCompleteSvgStringMarkup();
+            const textBufferNode = document.getElementById('hidden-clipboard-buffer');
+            
+            textBufferNode.value = rawSvgString;
+            textBufferNode.select();
+            document.execCommand('copy');
+
+            triggerCustomToastNotification("SVG Vector inline code copied to clipboard matrix");
+        }
+
+        function copyCssGradientToClipboard() {
+            const gradientCssMarkupString = `background: linear-gradient(${appConfig.gradient.angle}deg, ${appConfig.gradient.color1}, ${appConfig.gradient.color2}, ${appConfig.gradient.color3});`;
+            const textBufferNode = document.getElementById('hidden-clipboard-buffer');
+            
+            textBufferNode.value = gradientCssMarkupString;
+            textBufferNode.select();
+            document.execCommand('copy');
+
+
+            triggerCustomToastNotification("CSS Gradient linear styles copied to clipboard");
+        }
+
+        function downloadSvgVectorFile() {
+            const fullSvgString = generateCompleteSvgStringMarkup();
+            const dataBlobElement = new Blob([fullSvgString], { type: 'image/svg+xml;charset=utf-8' });
+            const temporaryUrlLink = URL.createObjectURL(dataBlobElement);
+            
+            const downloadTriggerNode = document.createElement('a');
+            downloadTriggerNode.href = temporaryUrlLink;
+            downloadTriggerNode.download = `wavecraft-background-${Date.now()}.svg`;
+            
+            document.body.appendChild(downloadTriggerNode);
+            downloadTriggerNode.click();
+            
+            document.body.removeChild(downloadTriggerNode);
+            URL.revokeObjectURL(temporaryUrlLink);
+            
+            triggerCustomToastNotification("Vector asset file download initialized successfully");
+
+        }
+
+        // Custom Layout Notification Box Handler Trigger
+        function triggerCustomToastNotification(messageString) {
+            const toast = document.getElementById('toast-notification');
+            const messageLabel = document.getElementById('toast-message');
+
+            messageLabel.innerText = messageString;
+            toast.classList.remove('translate-y-[-150%]');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-150%]');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
+
